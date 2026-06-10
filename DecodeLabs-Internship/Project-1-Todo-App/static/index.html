@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DecodeLabs · Task Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 60%, #f5576c 100%);
+      background-attachment: fixed;
+    }
+
+    /* FLOATING SHAPES */
+    body::before {
+      content:'';
+      position:fixed;inset:0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255,255,255,.1) 0%, transparent 40%);
+      pointer-events:none;z-index:0;
+    }
+
+    /* HEADER */
+    header {
+      position:sticky;top:0;z-index:100;
+      background:rgba(255,255,255,.2);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,.3);
+      padding:0 2rem;
+    }
+
+    .hdr {
+      max-width:780px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;
+      height:65px;
+    }
+
+    .logo {
+      display:flex;align-items:center;gap:.6rem;
+    }
+
+    .logo-circle {
+      width:38px;height:38px;
+      background:white;
+      border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.2rem;font-weight:800;
+      background:linear-gradient(135deg,#ff6b6b,#feca57);
+      color:white;
+      box-shadow:0 4px 15px rgba(255,107,107,.4);
+    }
+
+    .logo-text {
+      font-size:1.1rem;font-weight:700;color:white;
+      text-shadow:0 2px 10px rgba(0,0,0,.2);
+    }
+
+    .logo-text span { opacity:.7;font-weight:400;font-size:.85rem; }
+
+    .badge {
+      background:rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.4);
+      border-radius:20px;
+      padding:.3rem .9rem;
+      color:white;font-size:.75rem;font-weight:600;
+      display:flex;align-items:center;gap:.4rem;
+    }
+
+    .badge-dot {
+      width:7px;height:7px;border-radius:50%;
+      background:#2ecc71;
+      box-shadow:0 0 8px #2ecc71;
+      animation:blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%,100%{opacity:1;}50%{opacity:.4;}
+    }
+
+    /* HERO */
+    .hero {
+      position:relative;z-index:5;
+      text-align:center;
+      padding:3.5rem 1.5rem 2rem;
+    }
+
+    .hero-tag {
+      display:inline-block;
+      background:rgba(255,255,255,.2);
+      border:1px solid rgba(255,255,255,.4);
+      border-radius:20px;
+      padding:.35rem 1.1rem;
+      color:white;font-size:.78rem;font-weight:500;
+      margin-bottom:1rem;
+      letter-spacing:.05em;
+    }
+
+    .hero h1 {
+      font-size:clamp(2rem,5vw,3.2rem);
+      font-weight:800;color:white;
+      line-height:1.15;margin-bottom:.8rem;
+      text-shadow:0 4px 20px rgba(0,0,0,.2);
+    }
+
+    .hero h1 em {
+      font-style:normal;
+      background:linear-gradient(135deg,#ffd89b,#19547b);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .hero p {
+      color:rgba(255,255,255,.8);
+      font-size:.95rem;font-weight:400;
+    }
+
+    /* MAIN CARD */
+    .main-card {
+      position:relative;z-index:5;
+      max-width:700px;margin:0 auto;
+      padding:0 1.2rem 4rem;
+    }
+
+    /* STATS */
+    .stats {
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:1rem;margin-bottom:1.8rem;
+    }
+
+    .stat {
+      background:white;border-radius:18px;
+      padding:1.2rem;text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,.1);
+      transition:transform .2s;
+    }
+
+    .stat:hover{transform:translateY(-3px);}
+
+    .stat-n {
+      font-size:2rem;font-weight:800;
+      display:block;line-height:1;margin-bottom:.3rem;
+    }
+
+    .stat:nth-child(1) .stat-n { color:#667eea; }
+    .stat:nth-child(2) .stat-n { color:#f5576c; }
+    .stat:nth-child(3) .stat-n { color:#2ecc71; }
+
+    .stat-l {
+      font-size:.72rem;font-weight:600;
+      color:#aaa;text-transform:uppercase;letter-spacing:.08em;
+    }
+
+    /* PROGRESS */
+    .prog-wrap {
+      background:white;border-radius:16px;
+      padding:1.2rem 1.4rem;
+      margin-bottom:1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1);
+    }
+
+    .prog-top {
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:.7rem;
+    }
+
+    .prog-top span:first-child {
+      font-size:.82rem;font-weight:600;color:#555;
+    }
+
+    .prog-pct {
+      font-size:.85rem;font-weight:700;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .prog-track {
+      background:#f0f0f0;border-radius:10px;height:10px;overflow:hidden;
+    }
+
+    .prog-fill {
+      height:100%;border-radius:10px;
+      background:linear-gradient(90deg,#667eea,#f5576c);
+      transition:width .6s ease;
+    }
+
+    /* INPUT CARD */
+    .inp-card {
+      background:white;border-radius:20px;
+      padding:1.5rem;margin-bottom:1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.1);
+    }
+
+    .inp-title {
+      font-size:.78rem;font-weight:700;color:#888;
+      text-transform:uppercase;letter-spacing:.1em;
+      margin-bottom:1rem;
+    }
+
+    .inp-row {
+      display:flex;gap:.7rem;
+    }
+
+    .task-inp {
+      flex:1;
+      border:2px solid #f0f0f0;border-radius:12px;
+      font-family:'Poppins',sans-serif;font-size:.92rem;
+      padding:.75rem 1rem;outline:none;color:#333;
+      transition:border-color .2s,box-shadow .2s;
+      background:#fafafa;
+    }
+
+    .task-inp::placeholder{color:#bbb;}
+
+    .task-inp:focus {
+      border-color:#667eea;
+      box-shadow:0 0 0 4px rgba(102,126,234,.12);
+      background:white;
+    }
+
+    .add-btn {
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:white;border:none;border-radius:12px;
+      font-family:'Poppins',sans-serif;
+      font-weight:700;font-size:.9rem;
+      padding:.75rem 1.6rem;cursor:pointer;
+      box-shadow:0 4px 20px rgba(102,126,234,.45);
+      transition:transform .15s,box-shadow .2s,filter .2s;
+      white-space:nowrap;
+    }
+
+    .add-btn:hover {
+      filter:brightness(1.08);
+      box-shadow:0 6px 28px rgba(102,126,234,.6);
+      transform:translateY(-1px);
+    }
+
+    .add-btn:active{transform:scale(.97);}
+
+    /* FILTERS */
+    .filters {
+      display:flex;align-items:center;gap:.5rem;
+      margin-bottom:1.2rem;flex-wrap:wrap;
+    }
+
+    .f-btn {
+      background:rgba(255,255,255,.6);
+      border:1.5px solid rgba(255,255,255,.7);
+      color:white;font-family:'Poppins',sans-serif;
+      font-size:.8rem;font-weight:600;
+      padding:.35rem .95rem;border-radius:20px;
+      cursor:pointer;transition:all .18s;
+      backdrop-filter:blur(10px);
+    }
+
+    .f-btn:hover,.f-btn.active {
+      background:white;color:#667eea;border-color:white;
+    }
+
+    .f-spacer{flex:1;}
+
+    .clr-btn {
+      background:rgba(255,255,255,.2);
+      border:1.5px solid rgba(255,255,255,.4);
+      color:white;font-family:'Poppins',sans-serif;
+      font-size:.78rem;font-weight:500;
+      padding:.35rem .95rem;border-radius:20px;
+      cursor:pointer;transition:all .18s;
+    }
+
+    .clr-btn:hover{background:rgba(255,255,255,.35);}
+
+    /* TASK LIST */
+    .tlist{display:flex;flex-direction:column;gap:.7rem;}
+
+    .t-item {
+      background:white;border-radius:16px;
+      padding:1rem 1.1rem;
+      display:flex;align-items:center;gap:.9rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.08);
+      transition:transform .2s,box-shadow .2s;
+      animation:popIn .25s ease;
+    }
+
+    .t-item:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 30px rgba(0,0,0,.12);
+    }
+
+    .t-item.done{opacity:.5;}
+    .t-item.done .t-name{text-decoration:line-through;color:#aaa;}
+
+    @keyframes popIn {
+      from{opacity:0;transform:translateY(-8px) scale(.98);}
+      to{opacity:1;transform:translateY(0) scale(1);}
+    }
+
+    /* CHECKBOX */
+    .cb {
+      appearance:none;width:22px;height:22px;flex-shrink:0;
+      border:2.5px solid #ddd;border-radius:7px;cursor:pointer;
+      position:relative;transition:all .18s;
+    }
+
+    .cb:checked {
+      background:linear-gradient(135deg,#2ecc71,#1abc9c);
+      border-color:#2ecc71;
+      box-shadow:0 0 12px rgba(46,204,113,.3);
+    }
+
+    .cb:checked::after {
+      content:'✓';position:absolute;
+      top:50%;left:50%;transform:translate(-50%,-50%);
+      color:white;font-size:.75rem;font-weight:800;
+    }
+
+    .t-info{flex:1;min-width:0;}
+
+    .t-name {
+      font-size:.92rem;font-weight:600;color:#333;
+      display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      margin-bottom:.25rem;
+    }
+
+    .t-meta {
+      display:flex;align-items:center;gap:.5rem;
+    }
+
+    .t-id {
+      font-size:.68rem;color:#bbb;font-weight:500;
+    }
+
+    .t-time {
+      font-size:.67rem;color:#ccc;
+    }
+
+    .t-actions{display:flex;gap:.4rem;}
+
+    .a-btn {
+      width:32px;height:32px;border-radius:9px;
+      border:1.5px solid #f0f0f0;
+      background:#fafafa;color:#bbb;
+      font-size:.85rem;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .18s;
+    }
+
+    .a-btn:hover{border-color:#667eea;color:#667eea;background:#f0f2ff;}
+    .a-btn.d:hover{border-color:#f5576c;color:#f5576c;background:#fff0f2;}
+
+    /* EMPTY */
+    .empty {
+      background:white;border-radius:20px;
+      text-align:center;padding:3.5rem 1rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.08);
+    }
+
+    .empty-emoji{font-size:3rem;display:block;margin-bottom:1rem;}
+    .empty-title{font-size:1.1rem;font-weight:700;color:#555;margin-bottom:.4rem;}
+    .empty-sub{font-size:.82rem;color:#aaa;}
+
+    /* TOAST */
+    #toast {
+      position:fixed;bottom:2rem;right:2rem;
+      background:white;
+      border-radius:14px;
+      padding:.8rem 1.4rem;
+      font-size:.83rem;font-weight:600;color:#333;
+      box-shadow:0 8px 32px rgba(0,0,0,.15);
+      display:flex;align-items:center;gap:.5rem;
+      opacity:0;transform:translateY(12px);
+      transition:all .3s;z-index:999;pointer-events:none;
+    }
+    #toast.show{opacity:1;transform:translateY(0);}
+
+    /* MODAL */
+    .overlay {
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.5);
+      backdrop-filter:blur(8px);
+      z-index:200;
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .25s;
+    }
+    .overlay.show{opacity:1;pointer-events:all;}
+
+    .modal {
+      background:white;border-radius:22px;
+      padding:2rem;width:min(440px,92vw);
+      transform:scale(.93);transition:transform .25s;
+      box-shadow:0 20px 60px rgba(0,0,0,.2);
+    }
+    .overlay.show .modal{transform:scale(1);}
+
+    .m-title {
+      font-size:1rem;font-weight:700;color:#333;
+      margin-bottom:1.2rem;
+    }
+
+    .modal input {
+      width:100%;border:2px solid #f0f0f0;border-radius:12px;
+      font-family:'Poppins',sans-serif;font-size:.92rem;
+      padding:.75rem 1rem;outline:none;color:#333;
+      transition:border-color .2s;margin-bottom:1rem;
+    }
+
+    .modal input:focus{border-color:#667eea;}
+
+    .m-btns{display:flex;gap:.6rem;justify-content:flex-end;}
+
+    .btn-c {
+      background:#f5f5f5;border:none;color:#888;
+      font-family:'Poppins',sans-serif;font-weight:600;
+      font-size:.88rem;padding:.6rem 1.2rem;border-radius:10px;
+      cursor:pointer;transition:all .18s;
+    }
+    .btn-c:hover{background:#ffe0e5;color:#f5576c;}
+
+    .btn-s {
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      color:white;border:none;
+      font-family:'Poppins',sans-serif;font-weight:700;
+      font-size:.88rem;padding:.6rem 1.4rem;border-radius:10px;
+      cursor:pointer;box-shadow:0 4px 16px rgba(102,126,234,.4);
+      transition:filter .18s,transform .15s;
+    }
+    .btn-s:hover{filter:brightness(1.08);transform:translateY(-1px);}
+
+    /* FOOTER */
+    footer {
+      position:relative;z-index:5;
+      text-align:center;padding:1.5rem;
+      color:rgba(255,255,255,.6);
+      font-size:.75rem;
+    }
+    footer strong{color:white;}
+
+    @media(max-width:560px){
+      .stats{grid-template-columns:repeat(3,1fr);}
+      .inp-row{flex-wrap:wrap;}
+      .add-btn{width:100%;}
+      .t-time{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-circle">D</div>
+      <div class="logo-text">DecodeLabs <span>· Task Manager</span></div>
+    </div>
+    <div class="badge">
+      <div class="badge-dot"></div>
+      Live
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-tag">🚀 Project 1 · Batch 2026 · Industrial Training</div>
+  <h1>Manage Your<br/><em>Tasks Smartly</em></h1>
+  <p>Built with Python + Flask · Data lives in memory, persists to disk</p>
+</div>
+
+<div class="main-card">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-n" id="sT">0</span>
+      <span class="stat-l">Total</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n" id="sA">0</span>
+      <span class="stat-l">Active</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n" id="sD">0</span>
+      <span class="stat-l">Done</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span>Overall Progress</span>
+      <span class="prog-pct" id="pPct">0% Complete</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="pFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="inp-card">
+    <div class="inp-title">✏️ Add a New Task</div>
+    <div class="inp-row">
+      <input class="task-inp" id="tInp" type="text"
+        placeholder="What do you need to do?" maxlength="120"/>
+      <button class="add-btn" onclick="addTask()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="f-btn active" onclick="setF('all',this)">All</button>
+    <button class="f-btn" onclick="setF('active',this)">Active</button>
+    <button class="f-btn" onclick="setF('completed',this)">Done</button>
+    <div class="f-spacer"></div>
+    <button class="clr-btn" onclick="clearDone()">🗑 Clear Done</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="tlist" id="tList"></div>
+
+</div>
+
+<footer>
+  Made with ❤️ at <strong>DecodeLabs</strong> · Python + Flask + HTML · Project 1
+</footer>
+
+<div id="toast"></div>
+
+<div class="overlay" id="editOv">
+  <div class="modal">
+    <div class="m-title">✏️ Edit Task</div>
+    <input type="text" id="eInp" maxlength="120" placeholder="Update task..."/>
+    <div class="m-btns">
+      <button class="btn-c" onclick="closeM()">Cancel</button>
+      <button class="btn-s" onclick="saveE()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let tasks=[], filter='all', editId=null;
+
+  async function load(){
+    const r=await fetch('/api/tasks');
+    tasks=await r.json();render();
+  }
+
+  async function addTask(){
+    const inp=document.getElementById('tInp');
+    const task=inp.value.trim();
+    if(!task){toast('Please enter a task! ⚠️');return;}
+    const r=await fetch('/api/tasks',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({task,priority:'medium'})
+    });
+    if(r.ok){tasks.push(await r.json());inp.value='';render();toast('Task added! ✅');}
+  }
+
+  async function toggle(id){
+    const t=tasks.find(x=>x.id===id);if(!t)return;
+    const r=await fetch(`/api/tasks/${id}`,{
+      method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({completed:!t.completed})
+    });
+    if(r.ok){t.completed=!t.completed;render();toast(t.completed?'Great job! 🎉':'Reopened task');}
+  }
+
+  async function del(id){
+    const r=await fetch(`/api/tasks/${id}`,{method:'DELETE'});
+    if(r.ok){tasks=tasks.filter(x=>x.id!==id);render();toast('Task removed 🗑');}
+  }
+
+  async function clearDone(){
+    const r=await fetch('/api/tasks/completed',{method:'DELETE'});
+    if(r.ok){tasks=tasks.filter(x=>!x.completed);render();toast('Cleared! 🧹');}
+  }
+
+  function openEdit(id){
+    const t=tasks.find(x=>x.id===id);if(!t)return;
+    editId=id;
+    document.getElementById('eInp').value=t.task;
+    document.getElementById('editOv').classList.add('show');
+  }
+
+  function closeM(){document.getElementById('editOv').classList.remove('show');editId=null;}
+
+  async function saveE(){
+    const task=document.getElementById('eInp').value.trim();
+    if(!task)return;
+    const r=await fetch(`/api/tasks/${editId}`,{
+      method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({task,priority:'medium'})
+    });
+    if(r.ok){
+      const up=await r.json();
+      const i=tasks.findIndex(x=>x.id===editId);
+      if(i!==-1)tasks[i]=up;
+      closeM();render();toast('Updated! ✏️');
+    }
+  }
+
+  function setF(f,btn){
+    filter=f;
+    document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');render();
+  }
+
+  function getFilt(){
+    if(filter==='active')return tasks.filter(t=>!t.completed);
+    if(filter==='completed')return tasks.filter(t=>t.completed);
+    return tasks;
+  }
+
+  function render(){
+    const total=tasks.length;
+    const done=tasks.filter(t=>t.completed).length;
+    const pct=total?Math.round(done/total*100):0;
+    document.getElementById('sT').textContent=total;
+    document.getElementById('sA').textContent=total-done;
+    document.getElementById('sD').textContent=done;
+    document.getElementById('pPct').textContent=pct+'% Complete';
+    document.getElementById('pFill').style.width=pct+'%';
+
+    const list=document.getElementById('tList');
+    const ft=getFilt();
+
+    if(!ft.length){
+      list.innerHTML=`
+        <div class="empty">
+          <span class="empty-emoji">📝</span>
+          <div class="empty-title">No tasks yet!</div>
+          <div class="empty-sub">Add your first task above to get started</div>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML=ft.map(t=>`
+      <div class="t-item ${t.completed?'done':''}">
+        <input type="checkbox" class="cb" ${t.completed?'checked':''} onchange="toggle(${t.id})"/>
+        <div class="t-info">
+          <span class="t-name">${esc(t.task)}</span>
+          <div class="t-meta">
+            <span class="t-id">#${String(t.id).padStart(3,'0')}</span>
+            <span class="t-time">${t.created_at}</span>
+          </div>
+        </div>
+        <div class="t-actions">
+          <button class="a-btn" onclick="openEdit(${t.id})" title="Edit">✎</button>
+          <button class="a-btn d" onclick="del(${t.id})" title="Delete">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  let tt;
+  function toast(msg){
+    const el=document.getElementById('toast');
+    el.textContent=msg;el.classList.add('show');
+    clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2500);
+  }
+
+  document.getElementById('tInp').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+  document.getElementById('editOv').addEventListener('click',e=>{if(e.target===document.getElementById('editOv'))closeM();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+  load();
+</script>
+</body>
+</html>
